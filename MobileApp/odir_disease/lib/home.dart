@@ -31,6 +31,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 
+import 'package:image_cropper/image_cropper.dart';
+
+
 class Saved {
   late File image;
   late String name;
@@ -150,8 +153,8 @@ class _HomePageState extends State<HomePage> {
       _image = image;
     });
     debugPrint('Classifying...');
-
-    classifyImage(image);
+    var cropped = cropFile(image);
+    classifyImage(cropped);
   }
 
 
@@ -163,6 +166,32 @@ class _HomePageState extends State<HomePage> {
     checkPrediction();
     print(_learnMore);
   }
+
+  cropFile(image) async {
+  File? croppedFile = await ImageCropper.cropImage(
+      sourcePath: image.path,
+      aspectRatioPresets: [
+        CropAspectRatioPreset.square,
+        CropAspectRatioPreset.ratio3x2,
+        CropAspectRatioPreset.original,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.ratio16x9
+      ],
+      androidUiSettings: AndroidUiSettings(
+          toolbarTitle: 'Cropper',
+          toolbarColor: Colors.deepOrange,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: false),
+      iosUiSettings: IOSUiSettings(
+        minimumAspectRatio: 1.0,
+      )
+    );
+
+    return croppedFile;
+  }
+  
+  
 
   Future<void> showSaveDialog(
       BuildContext context, String predText, String confText) async {

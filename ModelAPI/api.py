@@ -72,18 +72,17 @@ async def predict(file: UploadFile = File(...)):
     # print(image_batch.shape)
 
     uploaded_image = cv2.imread(os.path.join(BASE_DIR, file.filename))
-    cv2.imwrite(os.path.join(BASE_DIR, file.filename)[:-3] + 'jpg', uploaded_image)
-    file_name = os.path.join(BASE_DIR, file.filename)[:-3] + 'jpg'
+    cv2.imwrite(os.path.join(BASE_DIR, file.filename)[:-3] + 'png', uploaded_image)
+    file_name = os.path.join(BASE_DIR, file.filename)[:-3] + 'png'
     print(file_name)
     file_img = cv2.imread(file_name)
-    file_img = cv2.cvtColor(file_img, cv2.COLOR_BGR2RGB)
+    #file_img = cv2.cvtColor(file_img, cv2.COLOR_BGR2RGB)
     print(file_img.shape)
-    #print(expanded.shape)
+    #print(expanded.shape)\
 
     cropped_image = crop_image(file_img)
-    # cropped_image = crop_contour_retinal_image(file_img)
     numpy_img = keras.preprocessing.image.img_to_array(cropped_image)
-    cv2.imwrite("something.jpg", cropped_image)
+    #cv2.imwrite("something.jpg", cropped_image)
     expanded = np.expand_dims(numpy_img, axis=0)
 
 
@@ -110,57 +109,106 @@ async def predict(file: UploadFile = File(...)):
     return {"label": label, "confidence": confidence}
 
 
-def crop_image(image, plot=False, image_size=(256, 256)):
-  # mask of colored pixels
-  mask = image > 10
+# def crop_image(image, plot=False, image_size=(256, 256)):
+#   # mask of colored pixels
+#   mask = image > 10
 
-  print('START')
-  # coordinates of colored pixels
-  coordinates = np.argwhere(mask)
+#   # coordinates of colored pixels
+#   coordinates = np.argwhere(mask)
 
-  # binding box of non-black pixels
-  x0, y0, s0 = coordinates.min(axis=0)
-  x1, y1, s1 = coordinates.max(axis=0) + 1 # slices are exclusive at the top
+#   # binding box of non-black pixels
+#   x0, y0, s0 = coordinates.min(axis=0)
+#   x1, y1, s1 = coordinates.max(axis=0) + 1 # slices are exclusive at the top
 
-  # get the contents of the bounding box
-  cropped = image[x0:x1, y0:y1]
+#   # get the contents of the bounding box
+#   cropped = image[x0:x1, y0:y1]
 
-  # convert to YUV for equalization
-  img_yuv = cv2.cvtColor(cropped, cv2.COLOR_RGB2YUV)
+#   # convert to YUV for equalization
+#   img_yuv = cv2.cvtColor(cropped, cv2.COLOR_RGB2YUV)
 
-  # apply adaptive equalization
-  clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
-  img_yuv[:, :, 0] = clahe.apply(img_yuv[:, :, 0])
+#   # apply adaptive equalization
+#   clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+#   img_yuv[:, :, 0] = clahe.apply(img_yuv[:, :, 0])
 
-  # apply image normalization
-  mask = np.zeros((256, 256))
-  normalized = cv2.normalize(img_yuv[:,:,0], mask, 0, 255, cv2.NORM_MINMAX)
+#   # apply image normalization
+#   mask = np.zeros((256, 256))
+#   normalized = cv2.normalize(img_yuv[:,:,0], mask, 0, 255, cv2.NORM_MINMAX)
 
-  # convert back to rgb
-  new_image = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2RGB)
+#   # convert back to rgb
+#   new_image = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2RGB)
 
-  new_image = cv2.resize(new_image, image_size, interpolation=cv2.INTER_AREA)
+#   new_image = cv2.resize(new_image, image_size, interpolation=cv2.INTER_AREA)
 
-  final_image = cv2.cvtColor(new_image, cv2.COLOR_RGB2BGR)
+#   final_image = cv2.cvtColor(new_image, cv2.COLOR_RGB2BGR)
 
-  if plot:
-    plt.subplot(1,2,1)
-    plt.imshow(image)
-    plt.title(f"Original - {image.shape}")
-    plt.axis('off')
-    plt.grid(False)
+#   if plot:
+#     plt.subplot(1,2,1)
+#     plt.imshow(image)
+#     plt.title(f"Original - {image.shape}")
+#     plt.axis('off')
+#     plt.grid(False)
 
-    # ----------------- #
+#     # ----------------- #
 
-    plt.subplot(1,2,2)
-    plt.imshow(new_image)
-    plt.title(f"Preprocessed - {new_image.shape}")
-    plt.axis('off')
-    plt.grid(False)
-    plt.show()
+#     plt.subplot(1,2,2)
+#     plt.imshow(new_image)
+#     plt.title(f"Preprocessed - {new_image.shape}")
+#     plt.axis('off')
+#     plt.grid(False)
+#     plt.show()
   
-  print('END')
-  return final_image
+#   return final_image
+
+def crop_image(image, plot=False, image_size=(256, 256)):
+    # mask of colored pixels
+    mask = image > 40
+    
+    # coordinates of colored pixels
+    coordinates = np.argwhere(mask)
+    
+    # binding box of non-black pixels
+    x0, y0, s0 = coordinates.min(axis=0)
+    x1, y1, s1 = coordinates.max(axis=0) + 1 # slices are exclusive at the top
+    
+    # get the content of the bouding box
+    cropped = image[x0:x1, y0:y1]
+    
+    # convert to COLOR_RGB2YUV for equalization
+    img_yuv = cv2.cvtColor(cropped, cv2.COLOR_RGB2YUV)
+    
+    # apply adaptive equalization on colored image
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+    img_yuv[:, :, 0] = clahe.apply(img_yuv[:, :, 0])
+    
+    # apply image normalization on colored image
+    mask = np.zeros((256, 256))
+    normalized = cv2.normalize(img_yuv[:, :, 0], mask, 0, 255, cv2.NORM_MINMAX)
+    
+    new_image = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2RGB)
+    new_image = cv2.resize(new_image, image_size, interpolation=cv2.INTER_AREA)
+    
+    # must convert back to BGR to have it saved as RGB
+    # cv2 just swaps channels when loaded hence BGR when shown
+    # only converted to RGB for visualization purposes
+    # but will be converted to BGR again to be saved as RGB
+    final_image = cv2.cvtColor(new_image, cv2.COLOR_RGB2BGR)
+    if plot:
+        plt.subplot(1,2,1)
+        plt.imshow(image)
+        plt.title(f"Original - {image.shape}")
+        plt.axis('off')
+        plt.grid(False)
+        
+        # -------------- #
+        plt.subplot(1,2,2)
+        plt.imshow(new_image)
+        plt.title(f"Preprocessed - {new_image.shape}")
+        plt.axis("off")
+        plt.grid(False)
+        
+        plt.show()
+        
+    return final_image
 
 
 def crop_contour_retinal_image(image, plot=False, image_size=(256, 256)):

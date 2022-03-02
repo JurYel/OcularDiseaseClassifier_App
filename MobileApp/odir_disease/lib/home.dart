@@ -168,7 +168,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   cropFile(image) async {
-  File? croppedFile = await ImageCropper.cropImage(
+  File? croppedFile = await ImageCropper().cropImage(
       sourcePath: image.path,
       aspectRatioPresets: [
         CropAspectRatioPreset.square,
@@ -340,7 +340,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         centerTitle: true,
         //shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        title: Text('OCULAR DISEASE CLASSIFICATION',
+        title: Text('OCULAR DISEASE DETECTION',
             style: GoogleFonts.nunito(
                 fontWeight: FontWeight.w600, letterSpacing: 1.1)),
         backgroundColor: Colors.transparent,

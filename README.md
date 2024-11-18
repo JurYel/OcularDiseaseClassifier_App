@@ -9,7 +9,7 @@ The developed deep learning model consists of 128 layers divided into 12 residua
 
 The data is first enhanced using Contrast Limited Adaptive Equalization (CLAHE), giving more emphasis on the features of the fundus image then it is fed to the model and is trained using a weighted loss function to account for the skewed data distribution, then softmax as its final activation function for the distributed prediction probabilities on each class, and lastly output a classification. To visualize the features focused by the model upon classification, Gradient-Weighted Class Activation Mapping (Grad-CAM) is used to show which features or factors are prioritized on model inference.
 
-You can view the source code for our custom-developed image classification in the link below: <br>
+You can view the source code for our custom-developed image classification model in the link below: <br>
 [Ocular Disease Classification with ResNet128-BNCReLU](https://www.kaggle.com/code/juryel/ocular-disease-detection-with-resnet128-bncrelu)
 
 ----------------------
